@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Informática - E.T.I. Girardot</title>
+    <style>
+        :root {
+            --primario: #2c3e50;
+            --secundario: #3498db;
+            --exito: #27ae60;
+            --error: #e74c3c;
+            --fondo: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--fondo);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #quiz-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--fondo);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+        }
+
+        h1 { color: var(--primario); font-size: 1.5rem; margin: 0; }
+        .mencion { color: var(--secundario); font-size: 0.9rem; font-weight: bold; }
+
+        #pregunta-texto {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .opciones-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            border: 2px solid var(--secundario);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: var(--secundario);
+            color: white;
+        }
+
+        .stats {
+            margin-top: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div class="header">
+        <h1>Refuerzo Académico</h1>
+        <div class="mencion">Mención: Informática - Girardot</div>
+    </div>
+
+    <div id="juego">
+        <p id="pregunta-texto">Cargando pregunta...</p>
+        <div id="opciones" class="opciones-grid"></div>
+        <p id="feedback"></p>
+        
+        <div class="stats">
+            <span>Pregunta: <span id="num-pregunta">0</span>/5</span>
+            <span>Puntos: <span id="puntos">0</span></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Nuestro "Tren" de datos (Vector de objetos)
+    const bancoPreguntas = [
+        {
+            q: "¿Qué componente es considerado el 'cerebro' de la computadora?",
+            options: ["Memoria RAM", "Disco Duro", "CPU (Procesador)", "Fuente de Poder"],
+            correct: 2
+        },
+        {
+            q: "En programación, ¿qué estructura se usa para repetir un código varias veces?",
+            options: ["Variable", "Ciclo (Loop)", "Comentario", "Constante"],
+            correct: 1
+        },
+        {
+            q: "¿Cuál es la unidad mínima de información en informática?",
+            options: ["Byte", "Pixel", "Bit", "Hertz"],
+            correct: 2
+        },
+        {
+            q: "¿Qué protocolo se utiliza para navegar por páginas web de forma segura?",
+            options: ["FTP", "HTTPS", "IP", "DNS"],
+            correct: 1
+        },
+        {
+            q: "¿Cuál de estos es un lenguaje de programación?",
+            options: ["HTML", "Windows", "JavaScript", "Excel"],
+            correct: 2
+        }
+    ];
+
+    let indiceActual = 0;
+    let score = 0;
+
+    function cargarPregunta() {
+        const feedbackElem = document.getElementById("feedback");
+        feedbackElem.innerText = "";
+        
+        if (indiceActual >= bancoPreguntas.length) {
+            finalizarJuego();
+            return;
+        }
+
+        const data = bancoPreguntas[indiceActual];
+        document.getElementById("pregunta-texto").innerText = data.q;
+        document.getElementById("num-pregunta").innerText = indiceActual + 1;
+
+        const opcionesDiv = document.getElementById("opciones");
+        opcionesDiv.innerHTML = "";
+
+        // Usamos un ciclo para crear los botones de las opciones
+        data.options.forEach((opcion, i) => {
+            const boton = document.createElement("button");
+            boton.innerText = opcion;
+            boton.onclick = () => verificarRespuesta(i);
+            opcionesDiv.appendChild(boton);
+        });
+    }
+
+    function verificarRespuesta(seleccionado) {
+        const correcta = bancoPreguntas[indiceActual].correct;
+        const feedbackElem = document.getElementById("feedback");
+
+        if (seleccionado === correcta) {
+            score++;
+            feedbackElem.innerText = "¡Correcto! ✨";
+            feedbackElem.style.color = "var(--exito)";
+        } else {
+            feedbackElem.innerText = "Incorrecto ❌";
+            feedbackElem.style.color = "var(--error)";
+        }
+
+        document.getElementById("puntos").innerText = score;
+
+        // Esperamos 1 segundo para que el estudiante vea si acertó antes de pasar
+        setTimeout(() => {
+            indiceActual++;
+            cargarPregunta();
+        }, 1000);
+    }
+
+    function finalizarJuego() {
+        const container = document.getElementById("quiz-container");
+        let mensaje = score >= 3 ? "¡Excelente trabajo, futuro colega!" : "Sigue practicando, tú puedes.";
+        
+        container.innerHTML = `
+            <div class="header">
+                <h1>Resultado Final</h1>
+            </div>
+            <p style="font-size: 1.5rem;">Puntaje: ${score} / ${bancoPreguntas.length}</p>
+            <p>${mensaje}</p>
+            <button onclick="location.reload()" style="width:100%; background: var(--primario); color:white;">Reiniciar Prueba</button>
+        `;
+    }
+
+    // Iniciar el sistema
+    cargarPregunta();
+</script>
+
+</body>
+</html>
